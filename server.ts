@@ -172,14 +172,31 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Helper read/write DB functions
-  const readData = async (filePath: string) => {
-    const raw = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(raw);
-  };
-
   const writeData = async (filePath: string, data: any) => {
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  };
+
+  // Helper read/write DB functions with self-healing fallback for local/hostinger empty files
+  const readData = async (filePath: string) => {
+    try {
+      const raw = await fs.readFile(filePath, "utf-8");
+      if (!raw || !raw.trim()) {
+        const fallback = filePath.endsWith("products.json") ? INITIAL_PRODUCTS 
+                       : filePath.endsWith("categories.json") ? INITIAL_CATEGORIES 
+                       : [];
+        await writeData(filePath, fallback);
+        return fallback;
+      }
+      return JSON.parse(raw);
+    } catch (err) {
+      const fallback = filePath.endsWith("products.json") ? INITIAL_PRODUCTS 
+                     : filePath.endsWith("categories.json") ? INITIAL_CATEGORIES 
+                     : [];
+      try {
+        await writeData(filePath, fallback);
+      } catch (writeErr) {}
+      return fallback;
+    }
   };
 
   // API Endpoints: Products
