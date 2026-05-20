@@ -23,7 +23,10 @@ async function ensureDataFiles() {
   // Helper init function
   const initFile = async (filePath: string, defaultData: any) => {
     try {
-      await fs.access(filePath);
+      const stats = await fs.stat(filePath);
+      if (stats.size === 0) {
+        throw new Error("File is empty (0 bytes)");
+      }
     } catch {
       await fs.writeFile(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
     }
