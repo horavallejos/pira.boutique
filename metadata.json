@@ -1,0 +1,6 @@
+{
+  "name": "Pirá Pará",
+  "description": "Equipamiento de pesca y outdoor con panel de administración para gestionar usuarios y contenidos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
